@@ -47,8 +47,7 @@ public class Footer extends HttpServlet {
 		out.append("</div>");
 		out.append("</footer><!-- End Footer -->");
 		
-		out.append(
-				"<a href=\"#\" class=\"back-to-top d-flex align-items-center justify-content-center\"><i class=\"bi bi-arrow-up-short\"></i></a>");
+		out.append("<a href=\"#\" class=\"back-to-top d-flex align-items-center justify-content-center\"><i class=\"bi bi-arrow-up-short\"></i></a>");
 		
 		out.append("<!-- Vendor JS Files -->");
 		out.append("<script src=\"/adv/adjavascript/apexcharts/apexcharts.min.js\"></script>");
@@ -58,7 +57,9 @@ public class Footer extends HttpServlet {
 		
 		out.append("<!-- Template Main JS File -->");
 		out.append("<script src=\"/adv/adjavascript/main.js\"></script>");
-		out.append("<script src=\"/adv/adjavascript/index.js\"></script>");
+		out.append("<script src=\"/adv/adjavascript/tags.js\"></script>");
+		out.append("<script src=\"/adv/adjavascript/scripts.js\"></script>");
+		out.append("<script src=\"/adv/adjavascript/profilesChangePassword.js\"></script>");
 		
 		out.append("</body>");
 		

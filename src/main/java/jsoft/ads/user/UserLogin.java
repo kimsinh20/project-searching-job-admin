@@ -3,6 +3,7 @@ package jsoft.ads.user;
 import java.io.IOException;
 import java.io.PrintWriter;
 
+import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -60,109 +61,152 @@ public class UserLogin extends HttpServlet {
 		out.append("<head>");
 		out.append("<meta charset=\"utf-8\">");
 		out.append("<meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">");
-		out.append("<title>Login V3</title>");
+		out.append("<title>Đăng Nhập</title>");
+		out.append("<link href=\"https://fonts.gstatic.com\" rel=\"preconnect\">");
+		out.append("<link href=\"https://fonts.googleapis.com/css?family=Open+Sans:300,300i,400,400i,600,600i,700,700i|Nunito:300,300i,400,400i,600,600i,700,700i|Poppins:300,300i,400,400i,500,500i,600,600i,700,700i\" rel=\"stylesheet\">");
 		out.append("<link href=\"/adv/adcss/all.min.css\" rel=\"stylesheet\">");
+		out.append("<link href=\"/adv/adcss/main.css\" type=\"text/css\" rel=\"stylesheet\">");
 		out.append("<link href=\"/adv/adcss/bootstrap.min.css\" rel=\"stylesheet\">");
-		out.append("<link href=\"/adv/adcss/main.css\" rel=\"stylesheet\">");
-		out.append("<script language=\"javascript\" src=\"/adv/adjavascript/loginV3.js\"></script>");
+		out.append("<link href=\"/adv/adcss/bootstrap-icons/bootstrap-icons.css\" rel=\"stylesheet\">");
+		out.append("<script language=\"javascript\" src=\"/adv/adjavascript/login.js\"></script>");
+		out.append("<script src=\"/adv/adjavascript/bootstrap.bundle.min.js\"></script>");
 		out.append("</head>");
 		out.append("<style>");
-	    out.append("body{");
-	    out.append("background-image: url(\"/adv/adimgs/background.jpg\");");
-	    out.append("background-repeat: no-repeat;");
-	    out.append(" background-size: cover;");
-	    out.append("}");
+		out.append("body{");
+		out.append("background: linear-gradient(120deg,#3ca7ee, #9b408f) ;");
+		out.append("height:100vh;");
+		out.append("overflow:hidden;");
+		out.append("}");
+		out.append("#errName {");
+		out.append("border-radius: 5px;");
+		out.append("margin-top: 4px;");
+		out.append("padding: 2px 0px;");
+		out.append("}");
+		out.append("#errPass {");
+		out.append("border-radius: 5px;");
+		out.append("margin-top: 4px;");
+		out.append("padding: 2px 0px;");
+		out.append("}");
 		out.append("</style>");
 		out.append("<body>");
-		out.append("<div class=\"container-xxl\">");
-		out.append("<div class=\"row\">");
+		out.append("<main>");
+		out.append("<div class=\"container\">");
 		out.append(
-				"<div class=\"col-xxl-6 offset-xxl-3\"> <!-- offset-3: ko có nội dung <=> col-3: ko có nội dung ( đỡ phải tạo div col-3) -->");
-
+				"<section class=\"section register min-vh-100 d-flex flex-column align-items-center justify-content-center\">");
+		out.append("<div class=\"container\">");
+		out.append("<div class=\"row justify-content-center\">");
+		out.append("<div class=\"col-lg-4 col-md-6 d-flex flex-column align-items-center justify-content-center\">");
 		// tìm tham số báo lỗi nếu có
-		String error = request.getParameter("err");
-		if (error != null) {
-			out.append("<div class=\"alert border-secondary alert-dismissible fade show\" role=\"alert\">");
+		String err = request.getParameter("err");
+		if (err != null) {
+			out.append("<div class=\"toast-container position-fixed top-0 end-0 me-4 mt-4\">");
+			out.append(
+					"<div id=\"liveToast\" class=\"toast\" role=\"alert\" aria-live=\"assertive\" aria-atomic=\"true\">");
+			out.append("<div class=\"toast-header\">");
 
-			switch (error) {
+			out.append("<strong class=\"me-auto text-danger\">Thông báo</strong>");
+			out.append("<small>10 giây</small>");
+			out.append(
+					"<button type=\"button\" class=\"btn-close\" data-bs-dismiss=\"toast\" aria-label=\"Close\"></button>");
+			out.append("</div>");
+			out.append("<div class=\"toast-body d-flex justify-content-between\">");
+			out.append("<p class=\"main\">");
+			switch (err) {
 			case "param":
-				out.append("Tham số lấy giá trị không chính xác");
-				break;
-			case "value":
 				out.append("Không tồn tại giá trị cho tài khoản");
 				break;
-			case "notok":
-				out.append("Đăng nhập không thành công");
+			case "value":
+				out.append("Tên đăng nhập chưa đúng yêu cầu. Vui lòng nhập lại!");
+				break;
+			case "loginfail":
+				out.append("Có lỗi trong quá trình đăng nhập!");
 				break;
 			default:
-				out.append("Có lỗi trong quá trình đăng nhập");
+				out.append("Có lỗi,vui lòng kiểm tra lại");
 			}
-			out.append(
-					"<button type=\"button\" class=\"btn-close\" data-bs-dismiss=\"alert\" aria-label=\"Close\"></button>");
+			out.append("</p>");
+			out.append("<div class=\"spinner-border text-danger\" role=\"status\">");
+			out.append("<span class=\"visually-hidden\">Loading...</span>");
+			out.append("</div><!-- End Border spinner -->");
 			out.append("</div>");
+			out.append("</div>");
+			out.append("</div>");
+
+			// script
+			out.append("<script language=\"javascript\" >");
+			out.append("const viewToast = document.getElementById('liveToast');");
+			out.append("const toast = new bootstrap.Toast(viewToast);");
+			out.append("toast.show();");
+			out.append("</script>");
 		}
 
-		out.append("<div class=\"loginTitle text-bg-info py-3 mt-5\">");
+		out.append("<div class=\"d-flex justify-content-center py-2 py-2\">");
+		out.append("<a href=\"index.html\" class=\"logo d-flex align-items-center w-auto\">");
+		out.append("<img src=\"assets/img/logo.png\" alt=\"\">");
+		out.append("<span class=\"d-none d-lg-block fs-2 text-dark fw-bold\">ADMIN JOBNOW</span>");
+		out.append("</a>");
+		out.append("</div><!-- End Logo -->");
+
+		out.append("<div class=\"card mb-3\">");
+		out.append("<div class=\"card-body\">");
+
+		out.append("<div class=\"pt-4 pb-2\">");
+		out.append("<h5 class=\"card-title text-center pb-0 fs-5 mb-2\">Đăng nhập tài khoản của bạn</h5>");
+		out.append("</div>");
+
+		out.append("<form class=\"row g-3 needs-validation\" method=\"POST\" novalidate>");
+
+		out.append("<div class=\"col-12\">");
+		out.append("<label for=\"yourUsername\" class=\"form-label\"><i class=\"bi bi-person-circle me-2\"></i>Tên tài khoản</label>");
 		out.append(
-				"<h3 class=\"text-center fw-bold text-uppercase\"><i class=\"fa-solid fa-user-tie space\"></i>&nbsp;Login</h3>");
-		out.append("</div>");
-		out.append("</div>");
-		out.append("</div>");
-		out.append("<div class=\"row\">");
-		out.append("<div class=\"col-xxl-6 offset-xxl-3\">");
-		out.append("<div class=\"loginForm text-bg-light py-2\">");
-		out.append("<form class=\"px-3\" method=\"post\">");
-		out.append("<div class=\"row py-2\">");
-		out.append("<div class=\"col-sm-4 text-end fs-5\" >Username</div>");
-		out.append("<div class=\"col-sm-6\">");
-		out.append(
-				"<input onKeyup=\"checkValiLogin()\" type=\"text\" class=\"form-control\" name=\"txtName\" id=\"name\" />");
+				"<input onKeyup=\"checkValiLogin()\" type=\"text\" class=\"form-control\" name=\"txtName\" id=\"name\">");
 		out.append("<div id=\"errName\"></div>");
 		out.append("</div>");
-		out.append("</div>");
-		out.append("<div class=\"row py-2\">");
-		out.append("<div class=\"col-sm-4 text-end fs-5\">Password</div>");
-		out.append("<div class=\"col-sm-6\">");
+
+		out.append("<div class=\"col-12\">");
+		out.append("<label for=\"yourPassword\" class=\"form-label\"><i class=\"bi bi-lock me-2\"></i>Mật Khẩu</label>");
 		out.append(
-				"<input onKeyup=\"checkValiLogin()\" type=\"password\" class=\"form-control\" name=\"txtPass\" id=\"pass\" />");
+				"<input onKeyup=\"checkValiLogin()\" type=\"password\" class=\"form-control\" name=\"txtPass\" id=\"pass\">");
 		out.append("<div id=\"errPass\"></div>");
 		out.append("</div>");
-		out.append("</div>");
-		out.append("<div class=\"row py-2\" >");
-		out.append("<div class=\"col-sm-6 offset-sm-4 fs-5\">");
-		out.append("<input type=\"checkbox\" class=\"form-check-input me-2 \" id=\"chkSave\"/>");
-		out.append("<label for=\"chkSave\" class=\"form-check-lable\">");
-		out.append("Save account on this PC?");
-		out.append("</label>");
-		out.append("</div>");
-		out.append("</div>");
-		out.append("<div class=\"row py-2\">");
-		out.append("<div class=\"col-sm-12 text-center fs-5\">");
+
+		out.append("<div class=\"col-12\">");
+		out.append("<div class=\"form-check\">");
 		out.append(
-				"<a href=\"#\" class=\"text-decoration-none\"><i class=\"fa-solid fa-key\"></i>&nbsp;Forget Password?</a>&nbsp;&nbsp;|&nbsp;&nbsp;");
+				"<input class=\"form-check-input\" type=\"checkbox\" name=\"remember\" value=\"true\" id=\"rememberMe\">");
+		out.append("<label class=\"form-check-label\" for=\"rememberMe\">Ghi nhớ</label>");
+		out.append("</div>");
+		out.append("</div>");
+		out.append("<div class=\"col-12\">");
 		out.append(
-				"<a href=\"#\" class=\"text-decoration-none\"><i class=\"fa-solid fa-circle-question\"></i>&nbsp;Help!</a>	");
+				"<button class=\"btn btn-primary w-100\" id=\"btn-login\" type=\"submit\" disabled><span class=\"spinner-border spinner-border-sm\" role=\"status\" aria-hidden=\"true\"></span>&nbsp;Đăng Nhập</button>");
 		out.append("</div>");
-		out.append("</div>");
-		out.append("<div class=\"row py-3\">");
-		out.append("<div class=\"col-sm-12 text-center fs-5\">");
-		out.append(
-				"<button type=\"submit\" class=\"btn btn-success fw-semibold px-5 py-2 me-4\" ><i class=\"fa-solid fa-right-to-bracket\"></i>&nbsp;Login</button>&nbsp;");
-		out.append(
-				"<button type=\"button\" class=\"btn btn-secondary fw-semibold px-5 py-2\" ><i class=\"fa-regular fa-circle-xmark\"></i>&nbsp;Exit</button>");
-		out.append("</div>");
-		out.append("</div>");
-		out.append("<div class=\"row py-3\">");
-		out.append("<div class=\"col-sm-11 text-end fs-6\">");
-		out.append(
-				"<a href=\"\" class=\"text-decoration-none\"><i class=\"fa-solid fa-language\"></i>&nbsp;Vietnamese</a>");
-		out.append("</div>");
+		out.append("<div class=\"col-12\">");
+		out.append("<p class=\"small mb-0\">Bạn chưa có tài khoản? <a href=\"/adv/register\">Tạo tài khoản</a></p>");
 		out.append("</div>");
 		out.append("</form>");
+
+		out.append("</div>");
+		out.append("</div>");
+
+		out.append("<div class=\"credits text-white\">");
+		out.append("<!-- All the links in the footer should remain intact. -->");
+		out.append("<!-- You can delete the links only if you purchased the pro version. -->");
+		out.append("<!-- Licensing information: https://bootstrapmade.com/license/ -->");
+		out.append(
+				"<!-- Purchase the pro version with working PHP/AJAX contact form: https://bootstrapmade.com/nice-admin-bootstrap-admin-html-template/ -->");
+		out.append("Thiết kế bởi <a class='text-white' href=\"https://bootstrapmade.com/\">Phan Kim Sinh</a>");
+		out.append("</div>");
+
 		out.append("</div>");
 		out.append("</div>");
 		out.append("</div>");
+
+		out.append("</section>");
+
 		out.append("</div>");
+		out.append("</main><!-- End #main -->");
+
 		out.append("<script src=\"/adv/adjavascript/bootstrap.bundle.min.js\"></script>");
 		out.append("</body>");
 		out.append("</html>");
@@ -213,10 +257,10 @@ public class UserLogin extends HttpServlet {
 					session.setAttribute("userLogined", user);
 
 					// Trở về giao diện chính
-					response.sendRedirect("/adv/view");
+					response.sendRedirect("/adv/view?success");
 
 				} else {
-					response.sendRedirect("/adv/user/login?err=notok");
+					response.sendRedirect("/adv/user/login?err=loginfail");
 				}
 
 			} else {

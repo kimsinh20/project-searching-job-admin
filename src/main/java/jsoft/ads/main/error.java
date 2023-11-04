@@ -36,7 +36,6 @@ public class error extends HttpServlet {
 
 		String err = request.getParameter("err");
 		if (err != null) {
-
 			out.append("<div class=\"toast-container position-fixed top-1 end-0 ps-3 pe-5 mb-3\">");
 			out.append(
 					"<div id=\"liveToast\" class=\"toast\" role=\"alert\" aria-live=\"assertive\" aria-atomic=\"true\">");
@@ -70,6 +69,9 @@ public class error extends HttpServlet {
 			case "edit":
 				out.append("Lỗi chỉnh sủa");
 				break;
+			case "profiles":
+				out.append("Lỗi chỉnh sủa người dùng");
+				break;
 			case "del":
 				out.append("lỗi thực hiện khi xóa");
 				break;
@@ -78,6 +80,15 @@ public class error extends HttpServlet {
 				break;
 			case "nopermis":
 				out.append("không có quyền được xóa");
+				break;
+			case "param":
+				out.append("Không tồn tại giá trị cho tài khoản");
+				break;
+			case "value":
+				out.append("Tên đăng nhập chưa đúng yêu cầu. Vui lòng nhập lại!");
+				break;
+			case "loginfail":
+				out.append("Có lỗi trong quá trình đăng nhập!");
 				break;
 			default:
 				out.append("Có lỗi,vui lòng kiểm tra lại");

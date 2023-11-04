@@ -58,13 +58,18 @@ public class UserControl {
 	}
 
 //	----------------------------------------------
-	public Pair<ArrayList<String>,Short> viewUser(Triplet<UserObject, Integer, Byte> infos, Pair<USER_SOFT, ORDER> so,int p) {
+	public ArrayList<String> viewUser(Triplet<UserObject, Integer, Byte> infos, Pair<USER_SOFT, ORDER> so,int page,String saveKey,boolean trash) {
 		Pair<ArrayList<UserObject>, Short> datas = this.um.getUserObjects(infos, so);
-
+  
 		ArrayList<String> views = new ArrayList<>();
-		views.add(UserLibrary.viewUser(datas.getValue0(), infos.getValue0(),p));
-
-		return new Pair<>(views, datas.getValue1());
+		String view1 = UserLibrary.viewUser(datas.getValue0(), infos.getValue0(),page).get(0);
+		String view3= UserLibrary.pagination(infos.getValue0(), datas.getValue1(), infos.getValue2(),page,saveKey,trash).toString();
+		String view2 = UserLibrary.viewUser(datas.getValue0(), infos.getValue0(),page).get(1);
+		views.add(view1);
+		views.add(view2);
+		views.add(view3);
+        
+		return views;
 	}
 
 	public static void main(String[] args) {

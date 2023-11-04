@@ -10,6 +10,12 @@
   /**
    * Easy selector helper function
    */
+   if(select('.datatable', true)!==undefined) {
+   var datatables = select('.datatable', true)
+  datatables.forEach(datatable => {
+    new simpleDatatables.DataTable(datatable);
+  })
+  }
   const select = (el, all = false) => {
     el = el.trim()
     if (all) {
@@ -298,10 +304,12 @@
   /**
    * Initiate Datatables
    */
-  const datatables = select('.datatable', true)
+   /*if(select('.datatable', true)!== undefined) {
+  let datatables = select('.datatable', true);
   datatables.forEach(datatable => {
     new simpleDatatables.DataTable(datatable);
   })
+  }*/
 
   /**
    * Autoresize echart charts
@@ -316,6 +324,5 @@
       }).observe(mainContainer);
     }, 200);
   }
-
 })();
 

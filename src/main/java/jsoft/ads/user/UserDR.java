@@ -1,6 +1,7 @@
 package jsoft.ads.user;
 
 import java.io.IOException;
+import jsoft.library.*;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -47,20 +48,39 @@ public class UserDR extends HttpServlet {
 							UserObject dUser = new UserObject();
 							dUser.setUser_id(id);
 							dUser.setUser_parent_id(pid);
-							boolean delResult = uc.delUser(dUser);
-							if(delResult) {
-								response.sendRedirect("/adv/user/list?page="+page+"");
+							dUser.setUser_last_modified(Utilities_date.getDate());
+							// tim tham so
+							String trash =request.getParameter("t");
+							String restore =request.getParameter("r");
+							String url = "/adv/user/list?page="+page;
+							boolean delResult;
+							if(trash == null) {
+								delResult = uc.delUser(dUser);	
+								url +="&trash"; 
 							} else {
-								response.sendRedirect("/adv/user?err=notok");
+								if(restore==null) {
+									delResult = uc.editUser(dUser, USER_EDIT_TYPE.TRASH);
+								} else {
+									delResult = uc.editUser(dUser, USER_EDIT_TYPE.RESTORE);
+								}
+								
+							}
+							
+							uc.releaseConnection();
+							
+							if(delResult) {
+								response.sendRedirect(url);
+							} else {
+								response.sendRedirect("/adv/user?err=notok&page="+page);
 							}
 						} else {
-							response.sendRedirect("/adv/user/list?err=nopermis");
+							response.sendRedirect("/adv/user/list?err=nopermis&page="+page);
 						}
 					} else {
-						response.sendRedirect("/adv/user/list?err=acclogin");
+						response.sendRedirect("/adv/user/list?err=acclogin&page="+page);
 					}
 				} else {
-					response.sendRedirect("/adv/user/list?err=del");
+					response.sendRedirect("/adv/user/list?err=del&page="+page);
 				}
 	}
 

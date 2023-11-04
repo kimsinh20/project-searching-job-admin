@@ -57,6 +57,7 @@ public class UserResetPass extends HttpServlet {
 			throws ServletException, IOException {
 		// TODO Auto-generated method stub
 		int id = (jsoft.library.Utilities.getIntParam(request, "id"));
+		int page = jsoft.library.Utilities.getIntParam(request, "page");
 		// tìm thông tin đăng nhập
 		UserObject user = (UserObject) request.getSession().getAttribute("userLogined");
 
@@ -81,7 +82,7 @@ public class UserResetPass extends HttpServlet {
 			final String senderEmail = "sinhkimphan20@gmail.com";
 			final String senderPassword = "foctyundbhlygtts"; // Replace with your password
 			if (userR.getUser_email() == null) {
-				response.sendRedirect("/adv/user/list?err=notok");
+				response.sendRedirect("/adv/user/list?err=notok?page="+page);
 			}
 			// Recipient's email address
 			String recipientEmail = userR.getUser_email();
@@ -127,14 +128,14 @@ public class UserResetPass extends HttpServlet {
 				Transport.send(message);
 				response.getWriter().write("Email sent successfully.");
 				if (result) {
-					response.sendRedirect("/adv/user/list");
+					response.sendRedirect("/adv/user/list?page="+page);
 				} else {
-					response.sendRedirect("/adv/user/list?err=changepass");
+					response.sendRedirect("/adv/user/list?err=changepass?page="+page);
 				}
 			} catch (MessagingException e) {
 				e.printStackTrace();
 				response.getWriter().write("Email sending failed.");
-				response.sendRedirect("/adv/user/list?err=failed");
+				response.sendRedirect("/adv/user/list?err=failed?page="+page);
 			}
 
 		} else {

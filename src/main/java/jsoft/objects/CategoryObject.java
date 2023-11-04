@@ -15,6 +15,8 @@ public class CategoryObject extends SectionObject{
 	private String category_image; 
 	private String category_name_en; 
 	private byte category_language;
+	private short category_permis;
+	private String category_section_name;
 	
 	public CategoryObject() {
 		super();
@@ -70,6 +72,23 @@ public class CategoryObject extends SectionObject{
 
 	public byte getCategory_language() {
 		return category_language;
+	}
+
+	
+	public String getCategory_section_name() {
+		return category_section_name;
+	}
+
+	public void setCategory_section_name(String category_section_name) {
+		this.category_section_name = category_section_name;
+	}
+
+	public short getCategory_permis() {
+		return category_permis;
+	}
+
+	public void setCategory_permis(short category_permis) {
+		this.category_permis = category_permis;
 	}
 
 	public void setCategory_id(short category_id) {

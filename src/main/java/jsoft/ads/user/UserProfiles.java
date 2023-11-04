@@ -1,6 +1,9 @@
 package jsoft.ads.user;
 
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.PrintWriter;
 import java.nio.file.Paths;
 
@@ -12,7 +15,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.Part;
-
+import jsoft.library.Utilities;
 import jsoft.ConnectionPool;
 import jsoft.objects.UserObject;
 
@@ -20,7 +23,11 @@ import jsoft.objects.UserObject;
  * Servlet implementation class View
  */
 @WebServlet("/user/profiles")
-@MultipartConfig
+@MultipartConfig(
+		fileSizeThreshold = 1024*1024*2,
+		maxFileSize = 1024*1024*10,
+		maxRequestSize = 1024*1024*11
+		)
 public class UserProfiles extends HttpServlet {
 	private static final long serialVersionUID = 1L;
 
@@ -65,7 +72,9 @@ public class UserProfiles extends HttpServlet {
 
 		// tim id của người sử dụng đẻ cập nhập
 		int id = jsoft.library.Utilities.getIntParam(request, "id");
-
+		int page = jsoft.library.Utilities.getIntParam(request, "page");
+		String view =request.getParameter("view");
+		boolean isView = (view!=null)?true:false;
 		UserObject editUser = null;
 
 		if (id > 0) {
@@ -80,6 +89,7 @@ public class UserProfiles extends HttpServlet {
 
 			// trả về kết nối
 			uc.releaseConnection();
+			
 		}
 
 		// tham chiếu tìm header
@@ -96,7 +106,7 @@ public class UserProfiles extends HttpServlet {
 		}
 
 		out.append("<div class=\"pagetitle d-flex\">");
-		out.append("<h1>Danh sách người sử dụng</h1>");
+		out.append("<h1>Hồ sơ người sử dụng</h1>");
 		out.append("<nav class=\"ms-auto\">");
 		out.append("<ol class=\"breadcrumb\">");
 		out.append("<li class=\"breadcrumb-item\"><a href=\"/adv/view\"><i class=\"bi bi-house\"></i></a></li>");
@@ -118,8 +128,7 @@ public class UserProfiles extends HttpServlet {
 		out.append("<div class=\"card-body profile-card pt-4 d-flex flex-column align-items-center\">");
 
 		if (editUser != null) {
-			out.append("<img src=\"/adv/adimgs/" + editUser.getUser_avatar()
-					+ "\" alt=\"Profile\" class=\"rounded-circle\">");
+			out.append("<img src=\" " + editUser.getUser_avatar()+"\" alt=\"Profile\" class=\"rounded-circle\">");
 			out.append("<h2>" + editUser.getUser_fullname() + "</h2>");
 			out.append("<h3>" + editUser.getUser_name() + "</h3>");
 			out.append("<div class=\"social-links mt-2\">");
@@ -146,7 +155,7 @@ public class UserProfiles extends HttpServlet {
 		out.append(
 				"<button class=\"nav-link active\" data-bs-toggle=\"tab\" data-bs-target=\"#overview\"><i class=\"fas fa-info-circle me-1\"></i>Tổng quát</button>");
 		out.append("</li>");
-
+        if(!isView) { 
 		out.append("<li class=\"nav-item\">");
 		out.append(
 				"<button class=\"nav-link\" data-bs-toggle=\"tab\" data-bs-target=\"#edit\"><i class=\"fas fa-pen-square me-1\"></i>Chỉnh sửa</button>");
@@ -161,7 +170,7 @@ public class UserProfiles extends HttpServlet {
 		out.append(
 				"<button class=\"nav-link\" data-bs-toggle=\"tab\" data-bs-target=\"#profile-change-password\"><i class=\"fas fa-unlock me-1\"></i>Đổi mật khẩu</button>");
 		out.append("</li>");
-
+        }
 		out.append("</ul>");
 		out.append("<div class=\"tab-content pt-2\">");
 
@@ -180,11 +189,11 @@ public class UserProfiles extends HttpServlet {
 			address = editUser.getUser_address();
 			email = editUser.getUser_email();
 			home = editUser.getUser_homephone();
+			avatar = editUser.getUser_avatar();
 			office = editUser.getUser_officephone() != null ? editUser.getUser_officephone() : "";
 			mobile = editUser.getUser_mobilephone() != null ? editUser.getUser_mobilephone() : "";
 			gender = editUser.getUser_gender();
 			birthday = editUser.getUser_birthday();
-			avatar = editUser.getUser_avatar();
 			job = editUser.getUser_job() != null ? editUser.getUser_job() : "";
 			jobarea = editUser.getUser_jobarea() != null ? editUser.getUser_jobarea() : "";
 			logined = editUser.getUser_logined();
@@ -244,10 +253,9 @@ public class UserProfiles extends HttpServlet {
 		out.append("<div class=\"row mb-3 align-items-center\">");
 		out.append("<label for=\"profileImage\" class=\"col-md-3 col-lg-2 col-form-label\">Hình Ảnh</label>");
 		out.append("<div class=\"col-md-9 col-lg-10\">");
-		out.append("<img src=\"/adv/adimgs/" + avatar + "\" id=\"blah\" alt=\"Profile\">");
+		out.append("<img src=\"" + avatar + "\" id=\"blah\" alt=\"Profile\">");
 		out.append("<div class=\"pt-2\">");
-		out.append(
-				"<input type=\"file\" name=\"avatar\" onchange=\"document.getElementById('blah').src = window.URL.createObjectURL(this.files[0])\">");
+		out.append("<input type=\"file\" value=\""+avatar+"\" name=\"avatar\" onchange=\"document.getElementById('blah').src = window.URL.createObjectURL(this.files[0])\">");
 		out.append("</div>");
 		out.append("</div>");
 		out.append("</div>");
@@ -342,8 +350,9 @@ public class UserProfiles extends HttpServlet {
 		out.append("</div>");
 
 		// truyen id theo co che bien trong an de thuc hien edit
-		if (id > 0 && isEdit) {
+		if (id > 0 && isEdit && page>0) {
 			out.append("<input type=\"hidden\" name=\"idForPost\" value=\"" + id + "\">");
+			out.append("<input type=\"hidden\" name=\"page\" value=\"" + page + "\">");
 			out.append("<input type=\"hidden\" name=\"act\" value=\"edit\">");
 		}
 		out.append("<div class=\"text-center\">");
@@ -405,6 +414,7 @@ public class UserProfiles extends HttpServlet {
 				"<label for=\"currentPassword\" class=\"col-md-4 col-lg-3 col-form-label\">Mật khẩu hiện tại</label>");
 		out.append("<div class=\"col-md-8 col-lg-9\">");
 		out.append("<input name=\"currentPassword\" type=\"password\" class=\"form-control\" id=\"currentPassword\">");
+		out.append("<i onclick=\"togglePassword1()\" id=\"crpass\" class=\"fa-solid fa-eye mt-2 ml-2 d-none\"></i>");
 		out.append("</div>");
 		out.append("<div id=\"errpassword\"></div>");
 		out.append("</div>");
@@ -412,6 +422,7 @@ public class UserProfiles extends HttpServlet {
 		out.append("<label for=\"newPassword\" class=\"col-md-4 col-lg-3 col-form-label\">Mật khẩu mới</label>");
 		out.append("<div class=\"col-md-8 col-lg-9\">");
 		out.append("<input name=\"newpassword\" type=\"password\" class=\"form-control\" id=\"newPassword\">");
+		out.append("<i onclick=\"togglePassword2()\" id=\"npass\" class=\"fa-solid fa-eye mt-2 ml-2 d-none\"></i>");
 		out.append("</div>");
 		out.append("<div id=\"errnewpassword\"></div>");
 		out.append("</div>");
@@ -419,7 +430,8 @@ public class UserProfiles extends HttpServlet {
 		out.append(
 				"<label for=\"renewPassword\" class=\"col-md-4 col-lg-3 col-form-label\">Nhập lại mật khẩu mới</label>");
 		out.append("<div class=\"col-md-8 col-lg-9\">");
-		out.append("<input name=\"renewpassword\" type=\"password\" class=\"form-control\" id=\"renewPassword\">");
+		out.append("<input  name=\"renewpassword\" type=\"password\" class=\"form-control\" id=\"renewPassword\">");
+		out.append(" <i onclick=\"togglePassword3()\" id=\"firmpass\" class=\"fa-solid fa-eye mt-2 ml-2 d-none\"></i>");
 		out.append("</div>");
 		out.append("<div id=\"errrenewpassword\"></div>");
 		out.append("</div>");
@@ -429,8 +441,13 @@ public class UserProfiles extends HttpServlet {
 			out.append("<input type=\"hidden\" name=\"act\" value=\"changePass\">");
 		}
 		out.append("<div class=\"text-center\">");
-		out.append("<button type=\"submit\" id=\"btnChangePass\" class=\"btn btn-primary me-2\">Đổi mật khẩu</button>");
-		out.append("<a href=\"/adv/user/reset?id="+id+"\" id=\"btnChangePass\" class=\"btn btn-success\">Reset mật khẩu</button>");
+		out.append("<p class=\"btn btn-success mb-0 me-3\" id=\"btnRandom\" onclick=\"generatePassword()\">");
+		out.append("<i class=\"fa-solid fa-circle-plus text-white\"></i>");
+		out.append("</p>");
+		out.append(
+				"<button type=\"submit\" id=\"btnChangePass\" class=\"btn btn-primary me-2\" disabled>Đổi mật khẩu</button>");
+		out.append("<a href=\"/adv/user/reset?page="+page+"&id=" + id
+				+ "\" id=\"btnResetPass\" class=\"btn btn-success\">Reset mật khẩu</a>");
 		out.append("</div>");
 		out.append("</form>");
 		out.append("</div>");
@@ -469,6 +486,7 @@ public class UserProfiles extends HttpServlet {
 		// lay id
 
 		int id = jsoft.library.Utilities.getIntParam(request, "idForPost");
+		int page = jsoft.library.Utilities.getIntParam(request, "page");
 		String action = request.getParameter("act");
 //		System.out.println(action);
 
@@ -488,15 +506,17 @@ public class UserProfiles extends HttpServlet {
 				String mobile = request.getParameter("txtMobilePhone");
 				int gender = jsoft.library.Utilities.getByteParam(request, "slcGender");
 				Part filePart = request.getPart("avatar");
-				// Save the file to the server's file system.
-				String avatar = Paths.get(filePart.getSubmittedFileName()).getFileName().toString();
-
-//			    String avatarObject = filePart.getHeader();
-
-//				System.out.println(avatar);
+				String avatar = "";
+				String filename = Paths.get(filePart.getSubmittedFileName()).getFileName().toString();
+				InputStream io = filePart.getInputStream();
+				  String path  = getServletContext().getRealPath("/")+"adimgs" + File.separator + filename;
+				  
+                if(jsoft.library.Utilities.saveFile(io, path)) {
+                	avatar = "/adv/adimgs/"+filename;
+                } 
 
 				if (fullname != null && !fullname.equalsIgnoreCase("") && email != null && !email.equalsIgnoreCase("")
-						&& home != null && !home.equalsIgnoreCase("")) {
+						) {
 					// Tạo đối tượng UserObject
 					UserObject eUser = new UserObject();
 					eUser.setUser_id(id);
@@ -533,13 +553,13 @@ public class UserProfiles extends HttpServlet {
 
 					//
 					if (result) {
-						response.sendRedirect("/adv/user/list");
+						response.sendRedirect("/adv/user/list?page="+page);
 					} else {
-						response.sendRedirect("/adv/user/list?err=edit");
+						response.sendRedirect("/adv/user/list?err=edit&page="+page);
 					}
 
 				} else {
-					response.sendRedirect("/adv/user/list?err=valueeadd");
+					response.sendRedirect("/adv/user/list?err=valueeadd&page="+page);
 				}
 			} else if (action != null && action.equalsIgnoreCase("changePass")) {
 				// sua mat khau
@@ -553,46 +573,47 @@ public class UserProfiles extends HttpServlet {
 					if (cp == null) {
 						getServletContext().setAttribute("CPool", cp);
 					}
-					UserObject userE = uc.getCheckPass(id,currenPass);
+					UserObject userE = uc.getCheckPass(id, currenPass);
 					// trả về kết nối
 					uc.releaseConnection();
-                    
-					  if (userE!=null) {
-							String newPass = request.getParameter("newpassword");
-							String reNewPass = request.getParameter("renewpassword");
-							if (newPass != null && !newPass.equalsIgnoreCase("") && reNewPass != null
-									&& !newPass.equalsIgnoreCase("") && newPass.equalsIgnoreCase(reNewPass)) {
-								UserObject eUser = new UserObject();
-								eUser.setUser_id(id);
-								eUser.setUser_pass(newPass);
-								// thuc hien doi mat khau
-								if (cp == null) {
-									getServletContext().setAttribute("CPool", cp);
-								}
-								boolean result = uc.editUser(eUser, USER_EDIT_TYPE.PASS);
-//								boolean result =true;
-								// trả về kết nối
-								uc.releaseConnection();
-								if (result) {
-									response.sendRedirect("/adv/user/list");
-								} else {
-									response.sendRedirect("/adv/user/list?err=changepass");
-								}
 
-							} else {
-								response.sendRedirect("/adv/user/list?err=valuepass");
+					if (userE != null) {
+						String newPass = request.getParameter("newpassword");
+						String reNewPass = request.getParameter("renewpassword");
+						if (newPass != null && !newPass.equalsIgnoreCase("") && reNewPass != null
+								&& !newPass.equalsIgnoreCase("") && newPass.equalsIgnoreCase(reNewPass)) {
+							UserObject eUser = new UserObject();
+							eUser.setUser_id(id);
+							eUser.setUser_pass(newPass);
+							// thuc hien doi mat khau
+							if (cp == null) {
+								getServletContext().setAttribute("CPool", cp);
 							}
+							boolean result = uc.editUser(eUser, USER_EDIT_TYPE.PASS);
+//								boolean result =true;
+							// trả về kết nối
+							uc.releaseConnection();
+							if (result) {
+								response.sendRedirect("/adv/user/list?page="+page);
+							} else {
+								response.sendRedirect("/adv/user/list?err=changepass&page="+page);
+							}
+
+						} else {
+							response.sendRedirect("/adv/user/list?err=valuepass&page="+page);
 						}
-					else {
-						response.sendRedirect("/adv/user/list?err=passnotmatch");
+					} else {
+						response.sendRedirect("/adv/user/list?err=passnotmatch&page="+page);
 					}
 				} else {
-					response.sendRedirect("/adv/user/list?err=valuepass");
+					response.sendRedirect("/adv/user/list?err=valuepass&page="+page);
 				}
 			}
 		} else {
-			response.sendRedirect("/adv/user/list?err=profiles");
+			response.sendRedirect("/adv/user/list?err=profiles&page="+page);
 		}
 	}
+
+	
 
 }

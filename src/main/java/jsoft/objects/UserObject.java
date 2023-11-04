@@ -27,6 +27,7 @@ public class UserObject {
 	private int user_parent_id;
 	private byte user_actions;
 	private String user_avatar;
+	private boolean user_deleted;
 	
 	
 
@@ -193,6 +194,14 @@ public class UserObject {
 
 	public void setUser_alias(String user_alias) {
 		this.user_alias = user_alias;
+	}
+
+	public boolean getUser_deleted() {
+		return user_deleted;
+	}
+
+	public void setUser_deleted(boolean user_deleted) {
+		this.user_deleted = user_deleted;
 	}
 	
 }

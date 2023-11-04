@@ -12,6 +12,7 @@ public class SectionObject {
 	private int section_created_author_id; 
 	private String section_name_en; 
 	private byte section_language;
+	private short section_permis;
 	
 	public SectionObject() {
 		
@@ -103,6 +104,14 @@ public class SectionObject {
 
 	public void setSection_language(byte section_language) {
 		this.section_language = section_language;
+	}
+
+	public short getSection_permis() {
+		return section_permis;
+	}
+
+	public void setSection_permis(short section_permis) {
+		this.section_permis = section_permis;
 	}
 	
 	

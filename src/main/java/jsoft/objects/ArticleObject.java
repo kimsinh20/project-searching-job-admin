@@ -8,7 +8,7 @@ public class ArticleObject extends CategoryObject{
 	private String article_content;
 	private String article_created_date;
 	private String article_last_modified;
-	private ArrayList<String> article_image;
+	private String article_image;
 	private short article_category_id;
 	private short article_section_id;
 	private short article_visited;
@@ -61,7 +61,7 @@ public class ArticleObject extends CategoryObject{
 		return article_last_modified;
 	}
 
-	public ArrayList<String> getArticle_image() {
+	public String getArticle_image() {
 		return article_image;
 	}
 
@@ -181,7 +181,7 @@ public class ArticleObject extends CategoryObject{
 		this.article_last_modified = article_last_modified;
 	}
 
-	public void setArticle_image(ArrayList<String> article_image) {
+	public void setArticle_image(String article_image) {
 		this.article_image = article_image;
 	}
 

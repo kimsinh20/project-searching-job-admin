@@ -18,8 +18,80 @@ body {
   color: #444444;
 }
 
+#form-control.error small {
+  color: #f50756;
+  display: none;
+}
+#address-items {
+list-style: none;	
+}
+#address-items li{
+	display: flex;
+	align-items: center; /* Canh chỉnh theo chiều dọc */
+    gap: 15px;
+    margin-bottom: 12px;
+}
+#address-items span {
+    flex: 1; /* Phần tử span mở rộng hết không gian còn lại */
+    font-weight: 550;
+    font-size: 16px;
+}
+#address-items li button{
+	border-radius: 4px;
+	color: white;
+	 margin-left: auto;
+	 background-color: #717ff5;
+	padding: 2px 6px;
+}
+#address-items li button:last-child{
+	background-color: #f50756 !important;
+	padding: 2px 4px!important;
+}
+#address-items li button:hover{
+	color: #f2f2f2;
+}
+
+
+/* Style the input fields */
+#regForm input {
+   
+}
+
+/* Mark input boxes that gets an error on validation: */
+#regForm input.invalid {
+    background-color: #ffdddd;
+}
+#regForm select.invalid {
+    background-color: #ffdddd;
+}
+/* Hide all steps by default: */
+.tab {
+    display: none;
+}
+
+/* Make circles that indicate the steps of the form: */
+.step {
+    height: 15px;
+    width: 15px;
+    margin: 0 2px;
+    background-color: #bbbbbb;
+    border: none;
+    border-radius: 50%;
+    display: inline-block;
+    opacity: 0.5;
+}
+
+/* Mark the active step: */
+.step.active {
+    opacity: 1;
+}
+
+/* Mark the steps that are finished and valid: */
+.step.finish {
+        background-color: #04AA6D;
+    }
+
 a {
-  color: #4154f1;
   text-decoration: none;
 }
 
@@ -386,6 +458,28 @@ h6 {
   max-height: 26px;
   margin-right: 6px;
 }
+.divs {
+    position: relative;
+    display: inline-block;
+    background-color: #fcc;
+    width: 135px;
+    text-align: center;
+}
+
+.inputs {
+    position:absolute;
+    top:0;
+    left: 0px;
+    width: 100%;
+    opacity: 0;
+    background: #00f;
+    z-index:999;
+}
+
+.icons {
+    position:relative;
+}
+
 
 .logo span {
   font-size: 26px;
@@ -496,7 +590,10 @@ h6 {
 }
 
 .header-nav .nav-profile img {
-  max-height: 36px;
+  vertical-align: middle;
+  width: 45px;
+  height: 45px;
+  border-radius: 50%;
 }
 
 .header-nav .nav-profile span {
@@ -631,6 +728,9 @@ h6 {
   background-color: #fff;
 }
 
+
+
+
 @media (max-width: 1199px) {
   .sidebar {
     left: -250px;
@@ -760,7 +860,6 @@ h6 {
 }
 
 .sidebar-nav .nav-content a i {
-  font-size: 6px;
   margin-right: 8px;
   line-height: 0;
   border-radius: 50%;
@@ -1065,6 +1164,10 @@ h6 {
 .profile .profile-edit img {
   max-width: 120px;
 }
+#btnRandom {
+	margin-bottom: 0px;
+    margin-right: 16px;
+}
 
 /*--------------------------------------------------------------
 # F.A.Q Page
@@ -1232,7 +1335,54 @@ h6 {
 .error-404 .btn:hover {
   background: #3e4f6f;
 }
-
+#tag
+#todo-input {
+    margin-left: 60px;
+    width: 400px;
+    height: 30px;
+}
+#add-todo {
+    margin-left: 10px;
+    height: 30px;
+    border-radius: 50%;
+    border: 2px solid #0cccf2;
+}
+#add-todo i {
+    color: #0cccf2;
+    font-size: 20px;
+}
+#todo-list {
+    margin: 0px;
+    list-style: none;
+    padding-left: 0px;
+}
+#todo-list li {
+    padding: 8px 4px;
+    width: 150px;
+    background-color:#8bb2e8 ;
+    text-align: start;
+    font-size: 16px;
+    border: 1px solid #1960c2;
+    border-radius: 10px;
+    margin-bottom: 20px;
+    display: flex;
+    justify-content: space-between;
+    margin-top:10px;
+    margin-bottom:10px;
+    font-weight: 540;
+}
+#todo-list li p {
+    margin: 0;
+    background-color: transparent;
+    color: #333;
+}
+#todo-list li p i {
+    margin-right: 10px;
+    font-size: 26px;
+}
+.complete {
+    background-color: #84e89c !important;
+}
 @media (min-width: 992px) {
   .error-404 img {
     max-width: 50%;

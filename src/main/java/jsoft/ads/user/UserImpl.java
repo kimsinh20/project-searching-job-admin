@@ -123,10 +123,15 @@ public class UserImpl extends BasicImpl implements User {
 		case PASS:
 			sql.append("user_pass=md5(?) ");
 			break;
+		case TRASH:
+			sql.append("user_deleted= 1, user_last_modified=? ");
+			break;
+		case RESTORE :
+			sql.append("user_deleted= 0, user_last_modified=? ");
+			break;
 		}
 		
 		sql.append(" WHERE user_id=?;");
-//    System.out.println(sql);
 		// bien dich
 		try {
 			PreparedStatement pre = this.con.prepareStatement(sql.toString());
@@ -164,7 +169,14 @@ public class UserImpl extends BasicImpl implements User {
 				pre.setString(1, item.getUser_pass());
 				pre.setInt(2, item.getUser_id());
 				break;
-				
+			case TRASH:
+				pre.setString(1, item.getUser_last_modified());
+				pre.setInt(2, item.getUser_id());
+				break;
+			case RESTORE:
+				pre.setString(1, item.getUser_last_modified());
+				pre.setInt(2, item.getUser_id());
+				break;
 			default:
 				throw new IllegalArgumentException("Unexpected value: " + et);
 			}
@@ -281,7 +293,7 @@ public class UserImpl extends BasicImpl implements User {
 	@Override
 	public ResultSet getUser(int id) {
 		// TODO Auto-generated method stub
-		String sql = "SELECT * FROM tblUser WHERE user_id = ?";
+		String sql = "SELECT * FROM tblUser WHERE (user_id = ?) AND (user_deleted=0)";
 		return this.get(sql, id);
 	}
 	
@@ -290,7 +302,7 @@ public class UserImpl extends BasicImpl implements User {
 	public ResultSet getUser(String username, String userpass) {
 		// TODO Auto-generated method stub
 
-		String sqlSlc = "SELECT * FROM tblUser WHERE (user_name = ?) AND (user_pass = md5(?)); ";
+		String sqlSlc = "SELECT * FROM tblUser WHERE (user_name = ?) AND (user_pass = md5(?)) AND (user_deleted=0); ";
 		String sqlUpd = "UPDATE tbluser SET user_logined = user_logined + 1  WHERE (user_name = ?) AND (user_pass = md5(?));";
 		ArrayList<String> sql = new ArrayList<String>();
 		sql.add(sqlSlc);
@@ -364,7 +376,18 @@ public class UserImpl extends BasicImpl implements User {
 		}
 		sql.append(" LIMIT " + at + ", " + total + ";");
 
-		sql.append("SELECT COUNT(user_id) AS total FROM tblUser;");
+		sql.append("SELECT COUNT(user_id) AS total FROM tblUser ");
+		sql.append(createConditions(similar));
+//		// tu khoa tim kiem
+//					String key = similar.getUser_name();
+//					if(key!=null) {
+//						sql.append(" AND (");
+//						sql.append("(user_name LIKE '%"+key+"%') OR ");
+//						sql.append("(user_fullname LIKE '%"+key+"%') OR ");
+//						sql.append("(user_address LIKE '%"+key+"%') OR ");
+//						sql.append("(user_email LIKE '%"+key+"%')  ");
+//						sql.append(")");
+//					}
 
 		return this.getMR(sql.toString());
 	}
@@ -373,7 +396,7 @@ public class UserImpl extends BasicImpl implements User {
 		StringBuffer conds = new StringBuffer();
 		if (similar != null) {
 			byte permis = similar.getUser_permission();
-			conds.append(" (user_permission<=").append(permis).append(")");
+			conds.append(" (user_permission<=").append(permis).append(") ");
 			if (permis < 4) {
 				int id = similar.getUser_id();
 				if (id > 0) {
@@ -381,6 +404,23 @@ public class UserImpl extends BasicImpl implements User {
 							.append(") )");
 				}
 			}
+			// tu khoa tim kiem
+			String key = similar.getUser_name();
+			if(key!=null) {
+				conds.append(" AND (");
+				conds.append("(user_name LIKE '%"+key+"%') OR ");
+				conds.append("(user_fullname LIKE '%"+key+"%') OR ");
+				conds.append("(user_address LIKE '%"+key+"%') OR ");
+				conds.append("(user_email LIKE '%"+key+"%')  ");
+				conds.append(")");
+			}
+			
+			if(similar.getUser_deleted()) {
+				conds.append(" AND (user_deleted=1)");
+			} else {
+				conds.append("AND (user_deleted=0) ");
+			}
+			
 		}
 		if (!conds.toString().equalsIgnoreCase("")) {
 			conds.insert(0, " WHERE ");
@@ -389,65 +429,65 @@ public class UserImpl extends BasicImpl implements User {
 	}
 
 	public static void main(String[] args) {
-		// tạo bộ quản lý kết nối
-		ConnectionPool cp = new ConnectionPoolImpl();
-
-		// đối tượng thực thi chức năng mức interface
-		User u = new UserImpl(cp);
-
-		// gia lap ADD
-		// tạo đối tượng lưu chữ thông tin thêm mới
-		UserObject nUser = new UserObject();
-		nUser.setUser_name("adVanHoangDao123");
-		nUser.setUser_created_date("06/06/2023");
-		nUser.setUser_email("let911318@gmail.com");
-		nUser.setUser_parent_id(56); // admin
-		nUser.setUser_pass("12345678");
-
-		nUser.setUser_fullname("Dao Van Hoang");
-		nUser.setUser_address("TP Hai Duong");
-
-		nUser.setUser_id(51);
-		boolean result = u.editUser(nUser,USER_EDIT_TYPE.GENERAL);
-		if (!result) {
-			System.out.println("------------------ADD FAIL---------------------");
-		}
-
-		// lấy tập kết quả
-		Triplet<UserObject, Integer, Byte> infos = new Triplet<>(null, 0, (byte) 15);
-
-		ArrayList<ResultSet> res = u.getUsers(infos, new Pair<>(USER_SOFT.NAME, ORDER.DESC));
-
-		ResultSet rs = res.get(0);
-
-		String row;
-
-		if (rs != null) {
-			try {
-				while (rs.next()) {
-					row = "ID: " + rs.getInt("user_id");
-//					row += "\tNAME: " + rs.getString("user_name");
-					row += "\tPARENT: " + rs.getInt("user_parent_id");
-					row += "\tPASS: " + rs.getString("user_pass");
-					System.out.println(row);
-				}
-			} catch (SQLException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		}
-
-		rs = res.get(1);
-		if (rs != null) {
-			try {
-				while (rs.next()) {
-					System.out.println("Tong so tai khoan trong DB:" + rs.getShort("total"));
-				}
-			} catch (SQLException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		}
+//		// tạo bộ quản lý kết nối
+//		ConnectionPool cp = new ConnectionPoolImpl();
+//
+//		// đối tượng thực thi chức năng mức interface
+//		User u = new UserImpl(cp);
+//
+//		// gia lap ADD
+//		// tạo đối tượng lưu chữ thông tin thêm mới
+//		UserObject nUser = new UserObject();
+//		nUser.setUser_name("adVanHoangDao123");
+//		nUser.setUser_created_date("06/06/2023");
+//		nUser.setUser_email("let911318@gmail.com");
+//		nUser.setUser_parent_id(56); // admin
+//		nUser.setUser_pass("12345678");
+//
+//		nUser.setUser_fullname("Dao Van Hoang");
+//		nUser.setUser_address("TP Hai Duong");
+//
+//		nUser.setUser_id(51);
+//		boolean result = u.editUser(nUser,USER_EDIT_TYPE.GENERAL);
+//		if (!result) {
+//			System.out.println("------------------ADD FAIL---------------------");
+//		}
+//
+//		// lấy tập kết quả
+//		Triplet<UserObject, Integer, Byte> infos = new Triplet<>(null, 0, (byte) 15);
+//
+//		ArrayList<ResultSet> res = u.getUsers(infos, new Pair<>(USER_SOFT.NAME, ORDER.DESC));
+//
+//		ResultSet rs = res.get(0);
+//
+//		String row;
+//
+//		if (rs != null) {
+//			try {
+//				while (rs.next()) {
+//					row = "ID: " + rs.getInt("user_id");
+//					row += "\tNAME: " + rs.getString("user_fullname");
+//					row += "\tPARENT: " + rs.getInt("user_parent_id");
+//					row += "\tPASS: " + rs.getString("user_pass");
+////					System.out.println(row);
+//				}
+//			} catch (SQLException e) {
+//				// TODO Auto-generated catch block
+//				e.printStackTrace();
+//			}
+//		}
+//
+//		rs = res.get(1);
+//		if (rs != null) {
+//			try {
+//				while (rs.next()) {
+//					System.out.println("Tong so tai khoan trong DB:" + rs.getShort("total"));
+//				}
+//			} catch (SQLException e) {
+//				// TODO Auto-generated catch block
+//				e.printStackTrace();
+//			}
+//		}
 	}
 
 	

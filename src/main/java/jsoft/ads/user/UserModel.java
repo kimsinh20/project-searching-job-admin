@@ -125,6 +125,8 @@ public class UserModel {
 					item.setUser_homephone(rs.getString("user_homephone"));
 					item.setUser_mobilephone(rs.getString("user_mobilephone"));
 					item.setUser_avatar(rs.getString("user_avatar"));
+					item.setUser_last_modified(rs.getString("user_last_modified"));
+					item.setUser_deleted(rs.getBoolean("user_deleted"));
 					
 					item.setUser_permission(rs.getByte("user_permission"));
 				}
@@ -165,6 +167,8 @@ public class UserModel {
 					item.setUser_mobilephone(rs.getString("user_mobilephone"));
 					item.setUser_logined(rs.getShort("user_logined"));
 					item.setUser_permission(rs.getByte("user_permission"));
+					item.setUser_last_modified(rs.getString("user_last_modified"));
+					item.setUser_deleted(rs.getBoolean("user_deleted"));
 					
 					items.add(item);
 				}

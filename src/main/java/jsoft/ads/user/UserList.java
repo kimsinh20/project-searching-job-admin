@@ -2,7 +2,7 @@ package jsoft.ads.user;
 
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.text.DecimalFormat;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 
 import javax.servlet.RequestDispatcher;
@@ -50,21 +50,22 @@ public class UserList extends HttpServlet {
 		if(jsoft.library.Utilities.getIntParam(request, "page")>0) {
 			page = jsoft.library.Utilities.getIntParam(request, "page");
 		}
-		
-//		System.out.println(page);
+		// lay tu khoa tim kiem
+			String key = request.getParameter("key");
+			String saveKey = (key!=null && !key.equalsIgnoreCase(""))?key.trim():"";
 		
 		// tìm thông tin đăng nhập
 		UserObject user = (UserObject) request.getSession().getAttribute("userLogined");
         
 		if (user != null) {
-			view(request, response, user,page);
+			view(request, response, user,page,saveKey);
 		} else {
 			response.sendRedirect("/adv/user/login");
 		}
 
 	}
 
-	protected void view(HttpServletRequest request, HttpServletResponse response, UserObject user,int page)
+	protected void view(HttpServletRequest request, HttpServletResponse response, UserObject user,int page,String saveKey)
 			throws ServletException, IOException {
 		// TODO Auto-generated method stub
 		// xác định kiểu nội dung xuất về trình khách
@@ -79,33 +80,42 @@ public class UserList extends HttpServlet {
 		if (cp == null) {
 			getServletContext().setAttribute("CPool", cp);
 		}
+		
+		saveKey = jsoft.library.Utilities.encode(saveKey);
+//		System.out.println(saveKey);
 
 		// tạo đối tượng thực thi chức năng
 		UserControl uc = new UserControl(cp);
 
 		// lấy cấu trúc
-
 		UserObject similar = new UserObject();
 		similar.setUser_id(user.getUser_id());
 		similar.setUser_permission(user.getUser_permission());
-		byte pageSize = 15;
+		similar.setUser_deleted(false);
+		similar.setUser_name(saveKey);
+		// tim thanh so xac dinh loại danh sách
+		String trash =request.getParameter("trash");
+		boolean isTrash = (trash!=null)?true:false;
+		String title;
+		if(trash==null) {
+	        similar.setUser_deleted(false);
+	   		title="Danh sách người sử dụng";
+		} else {
+			title ="Danh sách người sử dụng bị xóa";
+			similar.setUser_deleted(true);
+		}
+		byte pageSize = 5;
 		Triplet<UserObject, Integer, Byte> infos = new Triplet<>(similar, pageSize*(page-1), pageSize);
+		ArrayList<String> viewList = uc.viewUser(infos, new Pair<>(USER_SOFT.ID, ORDER.ASC),page,saveKey,isTrash);
 		
-		
-		Pair<ArrayList<String>,Short> viewList = uc.viewUser(infos, new Pair<>(USER_SOFT.ID, ORDER.ASC),page);
-		
-		short total = viewList.getValue1();
-		
-		int totalPage = total < pageSize ? 1 : (int) Math.ceil((double) total / pageSize);
-		
-		
-//		System.out.println(totalPage);
-        
 		// trả về kết nối
 		uc.releaseConnection();
 
+		
+		String pos = (trash==null)?"/header?pos=urlist":"/header?pos=urtrash";
+		
 		// tham chiếu tìm header
-		RequestDispatcher h = request.getRequestDispatcher("/header?pos=urlist");
+		RequestDispatcher h = request.getRequestDispatcher(pos);
 		if (h != null) {
 			h.include(request, response);
 		}
@@ -116,14 +126,40 @@ public class UserList extends HttpServlet {
 		if (error != null) {
 			error.include(request, response);
 		}
+		
+		// data export message
+		String success = request.getParameter("success");
+		if (success != null) {
+			out.append("<div class=\"toast-container position-fixed top-1 end-0 ps-3 pe-5 mb-3\">");
+			out.append(
+					"<div id=\"liveToast\" class=\"toast\" role=\"alert\" aria-live=\"assertive\" aria-atomic=\"true\">");
+			out.append("<div class=\"toast-header\">");
+			// out.append("<img src=\"...\" class=\"rounded me-2\" alt=\"...\">");
+			out.append("<strong class=\"me-auto text-success\">Thông báo</strong>");
+			out.append("<small>10 giây</small>");
+			out.append("<button type=\"button\" class=\"btn-close\" data-bs-dismiss=\"toast\" aria-label=\"Close\"></button>");
+			out.append("</div>");
+			out.append("<div class=\"toast-body\">");
+			out.append("Đã export");
+			out.append("</div>");
+			out.append("</div>");
+			out.append("</div>");
+
+			// script
+			out.append("<script language=\"javascript\" >");
+			out.append("const viewToast = document.getElementById('liveToast');");
+			out.append("const toast = new bootstrap.Toast(viewToast);");
+			out.append("toast.show();");
+			out.append("</script>");
+		}
 
 		out.append("<div class=\"pagetitle d-flex\">");
-		out.append("<h1>Danh sách người sử dụng</h1>");
+		out.append("<h1>"+title+"</h1>");
 		out.append("<nav class=\"ms-auto\">");
 		out.append("<ol class=\"breadcrumb\">");
 		out.append("<li class=\"breadcrumb-item\"><a href=\"/adv/view\"><i class=\"bi bi-house\"></i></a></li>");
 		out.append("<li class=\"breadcrumb-item\">Người sử dụng</li>");
-		out.append("<li class=\"breadcrumb-item active\">Danh sách</li>");
+		out.append("<li class=\"breadcrumb-item active\">"+(isTrash?"Thùng rác":"Danh sách")+"</li>");
 		out.append("</ol>");
 		out.append("</nav>");
 		out.append("</div><!-- End Page Title -->");
@@ -132,12 +168,12 @@ public class UserList extends HttpServlet {
 		// list user
 		out.append("<section class=\"section\">");
 		out.append("<div class=\"row\">");
-
 		out.append("<div class=\"col-lg-12\">");
-
+		
 		out.append("<div class=\"card\">");
 		out.append("<div class=\"card-body\">");
-
+        
+		if(trash==null) {
 		// add user modal
 		out.append("<button type=\"button\" class=\"btn btn-primary my-4 \" data-bs-toggle=\"modal\" data-bs-target=\"#staticBackdrop\"><i class=\"fa-solid fa-user-plus me-2\"></i>Thêm mới</button>");
 
@@ -216,39 +252,12 @@ public class UserList extends HttpServlet {
 		out.append("</div>");
 		out.append("</div>");
 		out.append("</form>");
-
-		out.append(viewList.getValue0().get(0));
-//		out.append("<h5 class=\"card-title\">Example </h5>");
-		// out.append("<p>This is an examle page with no contrnt. You can use it as a
-		// starter for your custom pages.</p>");
-
-		//phan trang
-		out.append("<nav aria-label=\"Page navigation example\">");
-		out.append("<ul class=\"pagination justify-content-center\">");
-		
-		String isPrevious = (page<=1)?"disabled":"";
-		String isNext = (page==totalPage)?"disabled":"";
-		
-		out.append("<li class=\"page-item "+isPrevious+"\">");
-		out.append("<a class=\"page-link\" href=\"/adv/user/list?page="+(page > 1 ? page - 1 : 1)+"\" tabindex=\"-1\" aria-disabled=\"true\">Previous</a>");
-		out.append("</li>");
-		
-		for(int i=1;i<=totalPage;i++) {
-		out.append("<li class=\"page-item");
-		if(i==page) {
-			out.append(" active\">");
-		} else {
-			out.append(" \">");
 		}
-		out.append("<a class=\"page-link\" href=\"/adv/user/list?page="+i+"\">"+i+"</a>");
-		out.append("</li>");
-		}
-		
-		out.append("<li class=\"page-item "+isNext+"\" >");
-		out.append("<a class=\"page-link\"  href=\"/adv/user/list?page="+(page < totalPage ? page + 1 : totalPage)+"\">Next</a>");
-		out.append("</li>");
-		out.append("</ul>");
-		out.append("</nav><!-- End Disabled and active states -->");
+        // list user
+		out.append(viewList.get(0));
+	    out.append("<a href=\"/adv/user/export\" class=\"btn btn-primary\">xuất file</a>");
+		// phan trang
+		out.append(viewList.get(2));
 		
 		out.append("</div>"); // end card-body
 		out.append("</div>"); // end card
@@ -257,8 +266,15 @@ public class UserList extends HttpServlet {
 		out.append("</div>");
 		out.append("</section>");
 
+		// charts
+		out.append("<div class=\"row\">");
+		out.append("<div class=\"col-lg-12\">");
+		out.append(viewList.get(1));
+		out.append("</div>");
+		out.append("</div>");
 		out.append("</main><!-- End #main -->");
 
+		
 		// tham chiếu tìm sidebar
 		RequestDispatcher f = request.getRequestDispatcher("/footer");
 		if (f != null) {
@@ -274,7 +290,7 @@ public class UserList extends HttpServlet {
 			throws ServletException, IOException {
 		// TODO Auto-generated method stub
 
-		request.setCharacterEncoding("utf-8");
+		request.setCharacterEncoding("UTF-8");
 
 		String name = request.getParameter("txtUsername");
 		String pass = request.getParameter("txtUserpass");
@@ -322,7 +338,10 @@ public class UserList extends HttpServlet {
 			}
 
 		} else {
-			response.sendRedirect("/adv/user/list?err=valueadd");
+			String key = request.getParameter("keyword");
+			 String encodedKeyword = URLEncoder.encode(key, "UTF-8");
+			String key_url = (key!=null && !key.equalsIgnoreCase(""))?("&key="+encodedKeyword):"";
+			response.sendRedirect("/adv/user/list?page=1"+key_url);
 		}
 	}
 

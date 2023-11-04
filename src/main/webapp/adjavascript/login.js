@@ -43,13 +43,14 @@ function checkValiLogin(){
 	} // name = ''
 	
 	// Xuat thong bao
-	viewErrName.style.paddingTop = '10px';
-	viewErrName.style.paddingBottom = '10px';
+	viewErrName.style.paddingTop = '5px';
+	viewErrName.style.paddingBottom = '5px';
+	viewErrName.style.marginTop = '4px';
 	if(!validName) {
 		viewErrName.innerHTML = messageErr;
 		
 		// dinh dang style
-		viewErrName.style.backgroundColor = 'red';
+		viewErrName.style.backgroundColor = '#f57d51';
 		viewErrName.style.color = 'yellow';
 
 	} else {
@@ -57,7 +58,7 @@ function checkValiLogin(){
 		
 		// dinh dang style
 		viewErrName.style.backgroundColor = 'transparent';
-		viewErrName.style.color = 'blue';
+		viewErrName.style.color = '#fff';
 	}
 	
 	// Kiem tra pass 
@@ -73,14 +74,15 @@ function checkValiLogin(){
 	}
 	
 	// Xuat thong bao
-	viewErrPass.style.paddingTop = '10px';
-	viewErrPass.style.paddingBottom = '10px';
+	viewErrPass.style.paddingTop = '5px';
+	viewErrPass.style.paddingBottom = '5px';
+	viewErrPass.style.marginTop = '4px';
 	if(!validPass) {
 		viewErrPass.innerHTML = messageErr;
 		
 		// dinh dang style
-		viewErrPass.style.backgroundColor = 'red';
-		viewErrPass.style.color = 'yellow';
+		viewErrPass.style.backgroundColor = '#f57d51';
+		viewErrPass.style.color = '#fff';
 
 	} else {
 		viewErrPass.innerHTML = '<i class="fa-solid fa-check"></i>';
@@ -90,5 +92,8 @@ function checkValiLogin(){
 		viewErrPass.style.color = 'blue';
 	}
 	
+	if(validName && validPass) {
+		document.getElementById('btn-login').disabled = false;
+	}
 	return validName && validPass
 }

@@ -262,6 +262,12 @@ public class BasicImpl implements Basic {
 		return res;
 	}
 
+	@Override
+	public synchronized boolean adds(PreparedStatement pre,PreparedStatement pre2) {
+		// TODO Auto-generated method stub
+		
+		return this.exe(pre2)&&this.exe(pre);
+	}
 	
 
 }
